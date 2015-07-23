@@ -6,9 +6,8 @@
 package com.cortex.console;
 
 import com.cortex.Cortex;
-import com.cortex.CortexCommandExecutor;
-import com.cortex.CortexCommandParser;
-import com.cortex.commands.CortexCommand;
+import com.cortex.DefaultCortexCommandExecutor;
+import com.cortex.DefaultCortexCommandParser;
 
 /**
  *
@@ -19,14 +18,8 @@ public class ConsoleCortex extends Cortex{
     public ConsoleCortex() {
         this.input = new CortexConsoleInput();
         this.output = new CortexConsoleOutput();
-
-        this.executor = new CortexCommandExecutor() {
-
-            @Override
-            public Object execute(CortexCommand command) {
-                return "pee!";
-            }
-        };
+        this.executor = new DefaultCortexCommandExecutor();
+        this.parser = new DefaultCortexCommandParser();
     }
     
     @Override

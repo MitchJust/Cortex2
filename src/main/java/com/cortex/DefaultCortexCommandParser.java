@@ -31,7 +31,7 @@ public class DefaultCortexCommandParser implements CortexCommandParser {
     }
 
     @Override
-    public Object parseCommand(String command) throws Exception{
+    public Object parseCommand(String command) throws Exception {
 
         //Clean up
         command = command.trim();
@@ -65,6 +65,13 @@ public class DefaultCortexCommandParser implements CortexCommandParser {
         if (command.charAt(command.length() - 1) == ')') {
 
             return parseMethodExecutionCommand(command);
+        }
+
+        //Class reference?
+        try {
+            return Class.forName(command);
+        } catch (ClassNotFoundException ex) {
+            //not a class
         }
 
         if (command.contains(".")) {
@@ -144,7 +151,9 @@ public class DefaultCortexCommandParser implements CortexCommandParser {
             }
         }
         //add the last parameter
-        if(sb.length()>0)parameterStrings.add(sb.toString());
+        if (sb.length() > 0) {
+            parameterStrings.add(sb.toString());
+        }
         Class[] parameterClasses = new Class[parameterStrings.size()];
         Object[] parameters = new Object[parameterStrings.size()];
 
@@ -172,18 +181,29 @@ public class DefaultCortexCommandParser implements CortexCommandParser {
         System.out.println("objectResolve = " + objectResolve);
 
         //Find the method
-        Method method = objectResolve.getClass().getDeclaredMethod(methodString, parameterClasses);
+        Method method;
+        if(objectResolve instanceof Class) {
+            method = ((Class)objectResolve).getDeclaredMethod(methodString, parameterClasses);
+            
+        } else {
+            method = objectResolve.getClass().getDeclaredMethod(methodString, parameterClasses);
+        }
 
         return new MethodInvokationCommand(objectResolve, method, parameters);
     }
 
     public static void main(String[] args) throws Exception {
         DefaultCortexCommandParser parser = new DefaultCortexCommandParser();
-        CortexCommand parseCommand = (CortexCommand) parser.parseCommand("java.lang.System.out.checkError()");
-        System.out.println("parseCommand = " + parseCommand);
+//        CortexCommand parseCommand = (CortexCommand) parser.parseCommand("java.lang.System.out.checkError()");
+//        System.out.println("parseCommand = " + parseCommand);
+//
+//        parseCommand = (CortexCommand) parser.parseCommand("java.lang.System.out.println(\"Hi\")");
+//        System.out.println("parseCommand = " + parseCommand);
         
-        parseCommand = (CortexCommand) parser.parseCommand("java.lang.System.out.println(\"Hi\")");
+        CortexCommand parseCommand = (CortexCommand) parser.parseCommand("java.lang.System.exit(0)");
         System.out.println("parseCommand = " + parseCommand);
+        parseCommand.execute();
+                
     }
 
 }
